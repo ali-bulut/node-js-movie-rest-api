@@ -72,61 +72,6 @@ const signUpAdmin = async (req, res, next) => {
     .json({ adminId: createdAdmin.id, email: createdAdmin.email, token });
 };
 
-const updateAdmin = async (req, res, next) => {
-  const { fullname, email, password } = req.body;
-  const adminId = req.params.adminId;
-
-  let admin;
-  try {
-    admin = await Admin.findById(adminId);
-  } catch (err) {
-    const error = new Error("Something went wrong, could not find an admin!");
-    return next(error);
-  }
-
-  if (!admin) {
-    return next(new Error("Something went wrong, could not find an admin!"));
-  }
-
-  admin.fullname = fullname;
-  admin.email = email;
-  admin.password = password;
-
-  try {
-    await admin.save();
-  } catch (err) {
-    const error = new Error("Updating admin failed, please try again!");
-    return next(error);
-  }
-
-  res.status(200).json({ admin: admin.toObject({ getters: true }) });
-};
-
-const deleteAdmin = async (req, res, next) => {
-  const adminId = req.params.adminId;
-
-  let admin;
-  try {
-    admin = await Admin.findById(adminId);
-  } catch (err) {
-    const error = new Error("Something went wrong, could not find an admin!");
-    return next(error);
-  }
-
-  if (!admin) {
-    return next(new Error("Something went wrong, could not find an admin!"));
-  }
-
-  try {
-    await admin.remove();
-  } catch (err) {
-    const error = new Error("Deleting admin failed, please try again!");
-    return next(error);
-  }
-
-  res.json({ message: "The Admin has been deleted!" });
-};
-
 const loginAdmin = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -178,8 +123,72 @@ const loginAdmin = async (req, res, next) => {
     .json({ adminId: identifiedAdmin.id, email: identifiedAdmin.email, token });
 };
 
+const updateAdmin = async (req, res, next) => {
+  const { fullname, email, password } = req.body;
+  const adminId = req.params.adminId;
+
+  let admin;
+  try {
+    admin = await Admin.findById(adminId);
+  } catch (err) {
+    const error = new Error("Something went wrong, could not find an admin!");
+    return next(error);
+  }
+
+  if (!admin) {
+    return next(new Error("Something went wrong, could not find an admin!"));
+  }
+
+  if(admin._id.toString() !== req.adminData.adminId){
+    return next(new Error('You are not allowed to update this admin!'));
+  }
+
+  admin.fullname = fullname;
+  admin.email = email;
+  admin.password = password;
+
+  try {
+    await admin.save();
+  } catch (err) {
+    const error = new Error("Updating admin failed, please try again!");
+    return next(error);
+  }
+
+  res.status(200).json({ admin: admin.toObject({ getters: true }) });
+};
+
+const deleteAdmin = async (req, res, next) => {
+  const adminId = req.params.adminId;
+
+  let admin;
+  try {
+    admin = await Admin.findById(adminId);
+  } catch (err) {
+    const error = new Error("Something went wrong, could not find an admin!");
+    return next(error);
+  }
+
+  if (!admin) {
+    return next(new Error("Something went wrong, could not find an admin!"));
+  }
+
+  if(admin._id.toString() !== req.adminData.adminId){
+    return next(new Error('You are not allowed to delete this admin!'));
+  }
+
+  try {
+    await admin.remove();
+  } catch (err) {
+    const error = new Error("Deleting admin failed, please try again!");
+    return next(error);
+  }
+
+  res.json({ message: "The Admin has been deleted!" });
+};
+
+
 exports.getAdmins = getAdmins;
 exports.signUpAdmin = signUpAdmin;
+exports.loginAdmin = loginAdmin;
 exports.updateAdmin = updateAdmin;
 exports.deleteAdmin = deleteAdmin;
-exports.loginAdmin = loginAdmin;

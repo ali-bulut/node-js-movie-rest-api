@@ -12,8 +12,8 @@ router.post('/login', loginAdmin);
 
 router.use(checkAuth);
 
-router.patch('/:adminId', updateAdmin);
+router.patch('/update/:adminId', updateAdmin);
 
-router.delete('/:adminId', deleteAdmin);
+router.delete('/delete/:adminId', deleteAdmin);
 
 module.exports=router;

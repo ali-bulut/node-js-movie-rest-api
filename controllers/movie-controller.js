@@ -89,6 +89,10 @@ const updateMovie = async (req, res, next) => {
     return next(new Error("Something went wrong, could not find a movie!"));
   }
 
+  if(movie.creator.toString() !== req.adminData.adminId){
+      return next(new Error('You are not allowed to edit this movie!'));
+  }
+
   movie.name = name;
   movie.downloadUrl = downloadUrl;
   movie.imageUrl = imageUrl;
@@ -116,6 +120,10 @@ const deleteMovie = async (req, res, next) => {
 
   if (!movie) {
     return next(new Error("Something went wrong, could not find a movie!"));
+  }
+
+  if(movie.creator.toString() !== req.adminData.adminId){
+    return next(new Error('You are not allowed to delete this movie!'));
   }
 
   try {
