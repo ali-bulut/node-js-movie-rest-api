@@ -9,98 +9,127 @@ const getMovies = async (req, res, next) => {
     return next(new Error("Fetching movies failed!"));
   }
 
-  if(!movies){
+  if (!movies) {
     return next(new Error("Could not find any movies!"));
   }
 
-  res.json({movies: movies.map(movie => movie.toObject({getters:true}))});
+  res.json({
+    movies: movies.map((movie) => movie.toObject({ getters: true })),
+  });
 };
 
-const addMovie = async (req,res,next) => {
-    const {name, downloadUrl, imageUrl, creator} = req.body;
+const getMoviesByAdminId = async (req,res,next) => {
+    const adminId = req.params.adminId;
 
-    const createdMovie = new Movie({
-        name,
-        downloadUrl,
-        imageUrl,
-        creator
-    });
+    let adminWithMovies;
     try {
-        await createdMovie.save();
+        adminWithMovies = await Admin.findById(adminId).populate('movies');
     } catch (err) {
-        return next(new Error('Adding movie failed!'))
+        const error = new Error(
+            "Fetching movies failed, please try again!"
+          );
+          return next(error);
     }
 
-    res.status(201).json({movie:createdMovie});
+    if (!adminWithMovies.movies || adminWithMovies.movies.length === 0)
+    return next(
+      new Error("Could not find any movies for the provided id!")
+    );
+
+  res.json({ movies: adminWithMovies.movies.map(movie => movie.toObject({ getters: true })) });
 }
 
-const updateMovie = async (req,res,next) => {
-    const {name, downloadUrl, imageUrl} = req.body;
-    const movieId = req.params.movieId;
+const addMovie = async (req, res, next) => {
+  const { name, downloadUrl, imageUrl, creator } = req.body;
 
-    let movie;
-    try {
-        movie = await Movie.findById(movieId);
-    } catch (err) {
-        const error = new Error(
-            "Something went wrong, could not find a movie!"
-          );
-          return next(error);
-    }
+  let admin;
+  try {
+    admin = await Admin.findById(req.adminData.adminId);
+  } catch (err) {
+    const error = new Error("Creating movie failed, please try again later!");
+    return next(error);
+  }
 
-    if(!movie){
-        return next(new Error(
-            "Something went wrong, could not find a movie!"));
-    }
+  if (!admin) {
+    return next(new Error("Could not find admin for provided id!"));
+  }
 
-    movie.name=name;
-    movie.downloadUrl=downloadUrl;
-    movie.imageUrl=imageUrl;
+  const createdMovie = new Movie({
+    name,
+    downloadUrl,
+    imageUrl,
+    creator: req.adminData.adminId,
+  });
 
-    try {
-        await movie.save();
-    } catch (err) {
-        const error = new Error(
-            "Updating movie failed, please try again!"
-          );
-          return next(error);
-    }
+  try {
+    await createdMovie.save();
+    admin.movies.push(createdMovie);
+    await admin.save();
 
-    res.status(200).json({movie:movie.toObject({getters:true})})
-}
+  } catch (err) {
+    return next(new Error("Adding movie failed!"));
+  }
 
-const deleteMovie = async (req,res,next) => {
-    const movieId = req.params.movieId;
+  res.status(201).json({ movie: createdMovie });
+};
 
-    let movie;
-    try {
-        movie = await Movie.findById(movieId);
-    } catch (err) {
-        const error = new Error(
-            "Something went wrong, could not find a movie!"
-          );
-          return next(error);
-    }
+const updateMovie = async (req, res, next) => {
+  const { name, downloadUrl, imageUrl } = req.body;
+  const movieId = req.params.movieId;
 
-    if(!movie){
-        return next(new Error(
-            "Something went wrong, could not find a movie!"));
-    }
+  let movie;
+  try {
+    movie = await Movie.findById(movieId);
+  } catch (err) {
+    const error = new Error("Something went wrong, could not find a movie!");
+    return next(error);
+  }
 
-    try {
-        await movie.remove();
-    } catch (err) {
-        const error = new Error(
-            "Deleting movie failed, please try again!"
-          );
-          return next(error);
-    }
+  if (!movie) {
+    return next(new Error("Something went wrong, could not find a movie!"));
+  }
 
-    res.json({message :'The Movie has been deleted!'});
-}
+  movie.name = name;
+  movie.downloadUrl = downloadUrl;
+  movie.imageUrl = imageUrl;
 
+  try {
+    await movie.save();
+  } catch (err) {
+    const error = new Error("Updating movie failed, please try again!");
+    return next(error);
+  }
 
-exports.getMovies=getMovies;
-exports.addMovie=addMovie;
-exports.updateMovie=updateMovie;
+  res.status(200).json({ movie: movie.toObject({ getters: true }) });
+};
+
+const deleteMovie = async (req, res, next) => {
+  const movieId = req.params.movieId;
+
+  let movie;
+  try {
+    movie = await Movie.findById(movieId);
+  } catch (err) {
+    const error = new Error("Something went wrong, could not find a movie!");
+    return next(error);
+  }
+
+  if (!movie) {
+    return next(new Error("Something went wrong, could not find a movie!"));
+  }
+
+  try {
+    await movie.remove();
+  } catch (err) {
+    const error = new Error("Deleting movie failed, please try again!");
+    return next(error);
+  }
+
+  res.json({ message: "The Movie has been deleted!" });
+};
+
+exports.getMovies = getMovies;
+exports.getMoviesByAdminId = getMoviesByAdminId;
+exports.addMovie = addMovie;
+exports.updateMovie = updateMovie;
 exports.deleteMovie = deleteMovie;
