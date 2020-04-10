@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const movieRoutes = require('./routes/movie-routes');
+const adminRoutes = require('./routes/admin-routes');
 
 const app=express();
 
@@ -18,6 +19,7 @@ app.use((req,res,next) => {
 });
 
 app.use('/api/movies', movieRoutes);
+app.use('/api/admins', adminRoutes);
 
 
 //end of the routes

@@ -42,15 +42,14 @@ const updateMovie = async (req,res,next) => {
     try {
         movie = await Movie.findById(movieId);
     } catch (err) {
-        const error = new HttpError(
-            "Something went wrong, could not find a movie!",
-            500
+        const error = new Error(
+            "Something went wrong, could not find a movie!"
           );
           return next(error);
     }
 
     if(!movie){
-        return next(new HttpError(
+        return next(new Error(
             "Something went wrong, could not find a movie!"));
     }
 
@@ -61,9 +60,8 @@ const updateMovie = async (req,res,next) => {
     try {
         await movie.save();
     } catch (err) {
-        const error = new HttpError(
-            "Updating movie failed, please try again!",
-            500
+        const error = new Error(
+            "Updating movie failed, please try again!"
           );
           return next(error);
     }
@@ -78,24 +76,22 @@ const deleteMovie = async (req,res,next) => {
     try {
         movie = await Movie.findById(movieId);
     } catch (err) {
-        const error = new HttpError(
-            "Something went wrong, could not find a movie!",
-            500
+        const error = new Error(
+            "Something went wrong, could not find a movie!"
           );
           return next(error);
     }
 
     if(!movie){
-        return next(new HttpError(
+        return next(new Error(
             "Something went wrong, could not find a movie!"));
     }
 
     try {
         await movie.remove();
     } catch (err) {
-        const error = new HttpError(
-            "Deleting movie failed, please try again!",
-            500
+        const error = new Error(
+            "Deleting movie failed, please try again!"
           );
           return next(error);
     }
