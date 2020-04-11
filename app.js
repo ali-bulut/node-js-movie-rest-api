@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const movieRoutes = require('./routes/movie-routes');
 const adminRoutes = require('./routes/admin-routes');
@@ -9,6 +10,8 @@ const app=express();
 
 
 app.use(bodyParser.json());
+
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 
 app.use((req,res,next) => {

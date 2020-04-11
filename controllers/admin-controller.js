@@ -21,7 +21,7 @@ const getAdmins = async (req, res, next) => {
 };
 
 const signUpAdmin = async (req, res, next) => {
-  const { fullname, email, password } = req.body;
+  const { fullname, email, password, image } = req.body;
 
   let existingAdmin;
   try {
@@ -47,6 +47,8 @@ const signUpAdmin = async (req, res, next) => {
     fullname,
     email,
     password: hashedPassword,
+    image
+    // image: req.file.path
   });
 
   try {

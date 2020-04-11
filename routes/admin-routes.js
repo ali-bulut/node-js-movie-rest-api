@@ -1,12 +1,13 @@
 const express = require("express");
 const {getAdmins, signUpAdmin, updateAdmin, deleteAdmin, loginAdmin} = require('../controllers/admin-controller'); 
 const checkAuth = require('../middlewares/check-auth');
+const fileUpload = require('../middlewares/file-upload');
 
 const router = express.Router();
 
 router.get('/', getAdmins);
 
-router.post('/signup', signUpAdmin);
+router.post('/signup', fileUpload.single('image'), signUpAdmin);
 
 router.post('/login', loginAdmin);
 
