@@ -1,8 +1,0 @@
-{
-    "env":{
-        "DB_USER":"alibulut",
-        "DB_PASSWORD":"12345a",
-        "DB_NAME":"heroku_vbk9fjld",
-        "JWT_KEY":"supersecretkey_dont_share"
-    }
-}
